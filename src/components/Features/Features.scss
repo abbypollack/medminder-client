@@ -1,0 +1,81 @@
+@use '../../styles/partials/_variables.scss' as *;
+@use '../../styles/partials/_mixins.scss' as *;
+
+.features {
+    background-color: $white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: $mobile-padding-left-right;
+
+    @include tablet {
+        padding: $tablet-padding-left-right;
+    }
+
+    &__cta {
+        @include button;
+
+        @include tablet{
+            width: 50%;
+        }
+    }
+
+    &__title {
+        color: $dark-blue;
+        font-family: $font-family-light;
+        font-size: 2rem;
+        margin: 5vh 0;
+
+        @include tablet {
+            font-size: 3rem;
+        }
+    }
+    &__link{
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    &__container {
+        display: flex;
+        flex-direction: column;
+
+        @include tablet {
+            flex-direction: row;
+        }
+    }
+
+    &__text {
+        padding: 0 10px;
+    }
+
+    &__box {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        align-items: center;
+        border-radius: 25px;
+        height: 30vh;
+        margin: 10px 0;
+        font-family: $font-family-bold;
+        color: $dark-blue;
+        background-color: $light-blue;
+
+        @include tablet {
+            width: 30vw;
+            height: 30vw;
+        }
+
+        &:not(:first-child) {
+            @include tablet {
+                margin-left: 20px;
+            }
+        }
+    }
+
+    &__image {
+        height: 100px;
+        margin-bottom: 10px;
+    }
+}

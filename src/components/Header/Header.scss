@@ -1,0 +1,36 @@
+@use '../../styles/partials/_variables.scss' as *;
+@use '../../styles/partials/_mixins.scss' as *;
+
+.header {
+    background-color: $light-blue;
+    height: 10vh;
+    font-family: $font-family-bold;
+
+    @include tablet {
+        padding: $tablet-padding-left-right;
+    }
+
+    &__nav {
+        height: 100%;
+        display: none;
+
+        @include tablet {
+            display: block;
+        }
+
+        &-list {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+
+        &-link {
+            color: $white;
+
+            &.active {
+                color: $orange;
+            }
+        }
+    }
+}

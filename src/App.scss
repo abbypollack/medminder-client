@@ -1,0 +1,24 @@
+@use './styles/partials/_variables.scss' as *;
+@use './styles/partials/_mixins.scss' as *;
+
+/* Reset */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+ul,
+ol {
+    list-style: none;
+}
+
+a {
+    text-decoration: none;
+}
+
+body{
+    font-family: $font-family-regular;
+}

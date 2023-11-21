@@ -1,0 +1,65 @@
+@use '../../styles/partials/_variables.scss' as *;
+@use '../../styles/partials/_mixins.scss' as *;
+
+.footer {
+    padding: $mobile-padding-left-right;
+    background-color: $medium-blue;
+    color: $white;
+    display: flex;
+    flex-direction: column;
+
+    @include tablet {
+        padding: $tablet-padding-left-right;
+    }
+
+    &__logo {
+        height: 10vh;
+
+        &-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+    }
+
+    &__nav {
+        &-column {
+            @include tablet {
+                margin-left: 4rem;
+            }
+
+            &:last-child {
+                text-align: right;
+            }
+        }
+
+        &-list {
+            display: flex;
+            justify-content: space-between;
+
+            @include tablet {
+                justify-content: flex-end;
+            }
+        }
+
+        &-link {
+            font-family: $font-family-regular;
+            color: $white;
+
+            &.active {
+                color: $orange;
+                font-family: $font-family-bold;
+            }
+        }
+
+        &-navigate {
+            text-transform: uppercase;
+        }
+    }
+
+    &__copyright {
+        text-align: center;
+        font-size: 13px;
+        margin: 10px 0;
+    }
+}

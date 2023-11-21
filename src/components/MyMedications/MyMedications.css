@@ -1,0 +1,12 @@
+@font-face {
+  font-family: "montserrat-semibold";
+  src: url("../../assets/fonts/Montserrat/static/Montserrat-SemiBold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "montserrat";
+  src: url("../../assets/fonts/Montserrat/static/Montserrat-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "montserrat-extralight";
+  src: url("../../assets/fonts/Montserrat/static/Montserrat-ExtraLight.ttf") format("truetype");
+}/*# sourceMappingURL=MyMedications.css.map */
