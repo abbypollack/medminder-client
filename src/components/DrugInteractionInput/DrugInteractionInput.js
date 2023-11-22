@@ -18,7 +18,7 @@ function DrugInteractionInput() {
   }, [inputValue]);
 
   const handleSearch = async () => {
-    const apiUrl = 'http://localhost:8080/api/drug/interactions';
+    const apiUrl = '/api/drug/interactions';
 
     try {
       const response = await axios.post(apiUrl, { drugs: yourDrugs.map((drug) => drug.rxNormId) });

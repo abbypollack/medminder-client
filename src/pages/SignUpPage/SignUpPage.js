@@ -1,6 +1,18 @@
 import './SignUpPage.scss';
+import LoginButton from '../../components/LoginButton/LoginButton';
 
-function SignUpPage(){
+const SignupPage = () => {
+  const handleSignup = (signupData) => {
+    // API call 
+    console.log("Signup Data:", signupData);
+  };
 
-}
-export default SignUpPage
+  return (
+    <div>
+      <h1>Sign Up</h1>
+      <LoginButton />
+    </div>
+  );
+};
+
+export default SignupPage;

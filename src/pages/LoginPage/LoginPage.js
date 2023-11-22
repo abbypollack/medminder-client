@@ -1,6 +1,18 @@
 import './LoginPage.scss'
+import LoginButton from '../../components/LoginButton/LoginButton';
 
-function LoginPage(){
+const LoginPage = () => {
+  const handleLogin = (loginData) => {
+    //  API call
+    console.log("Login Data:", loginData);
+  };
 
-}
-export default LoginPage
+  return (
+    <div>
+      <h1>Login</h1>
+      <LoginButton />
+    </div>
+  );
+};
+
+export default LoginPage;
