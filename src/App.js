@@ -11,7 +11,6 @@ import MedicationHistoryPage from './pages/MedicationHistoryPage/MedicationHisto
 import ProfilePage from './pages/ProfilePage/ProfilePage';
 import NotFound from './pages/NotFound/NotFound';
 import AuthFailPage from './pages/AuthFailPage/AuthFailPage';
-// import OAuthCallback from './components/OAuthCallBack/OAuthCallBack'
 import { AuthProvider } from './auth/AuthContext';
 
 
@@ -28,7 +27,6 @@ function App() {
           <Route path="/mymedications" element={<MyMedicationsPage />} />
           <Route path="/interactioncheck" element={<InteractionCheckPage />} />
           <Route path="/medicationhistory" element={<MedicationHistoryPage />} />
-          {/* <Route path="/auth/:provider/callback" element={<OAuthCallback />} /> */}
           <Route path="auth-fail" element={<AuthFailPage />} />
           <Route element={NotFound} />
         </Routes>
