@@ -2,7 +2,7 @@ import './SignUpPage.scss';
 import GoogleAuthButton from '../../components/GoogleAuthButton/GoogleAuthButton';
 import { useState } from 'react';
 import axios from 'axios';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Input from "../../components/Input/Input";
 
 const SERVER_URL = process.env.REACT_APP_SERVER_URL;
@@ -19,16 +19,21 @@ function SignupPage() {
         confirm_password: '',
     });
     const [errors, setErrors] = useState({});
+    const navigate = useNavigate();
 
     const handleChange = (event) => {
         const { name, value } = event.target;
         setFormData({ ...formData, [name]: value });
 
-        if (errors[name]) {
-            const newErrors = { ...errors };
+        let newErrors = { ...errors };
+        if (name === "password" && formData.confirm_password && value !== formData.confirm_password) {
+            newErrors.confirm_password = 'Passwords do not match.';
+        } else if (name === "confirm_password" && formData.password && value !== formData.password) {
+            newErrors.confirm_password = 'Passwords do not match.';
+        } else {
             newErrors[name] = '';
-            setErrors(newErrors);
         }
+        setErrors(newErrors);
     };
 
     const handleSubmit = async (event) => {
@@ -47,6 +52,7 @@ function SignupPage() {
             setSuccess(true);
             setError("");
             event.target.reset();
+            navigate('/profile');
         } catch (error) {
             setError(error.response?.data.message || 'Error signing up.');
         }
