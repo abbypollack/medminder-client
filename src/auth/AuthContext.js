@@ -22,9 +22,10 @@ export const AuthProvider = ({ children }) => {
       })
       .catch(() => {
         setIsLoggedIn(false);
+        setUser(null);
       });
   }, []);
-
+  
   return (
     <AuthContext.Provider value={{ isLoggedIn, user, setUser: setUserAndLogin }}>
       {children}
