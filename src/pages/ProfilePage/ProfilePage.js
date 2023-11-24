@@ -1,5 +1,4 @@
 import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
 import { AuthContext } from '../../auth/AuthContext';
 import Profile from '../../components/Profile/Profile';
 import Unauthenticated from '../../components/Unauthenticated/Unauthenticated';
