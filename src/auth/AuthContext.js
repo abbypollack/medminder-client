@@ -9,6 +9,11 @@ export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
 
+  const setUserAndLogin = (userData) => {
+    setIsLoggedIn(true);
+    setUser(userData);
+  };
+
   useEffect(() => {
     axios.get(`${SERVER_URL}/auth/profile`, { withCredentials: true })
       .then((res) => {
@@ -21,7 +26,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, user }}>
+    <AuthContext.Provider value={{ isLoggedIn, user, setUser: setUserAndLogin }}>
       {children}
     </AuthContext.Provider>
   );
