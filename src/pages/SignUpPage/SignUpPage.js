@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Input from "../../components/Input/Input";
 
 const SERVER_URL = process.env.REACT_APP_SERVER_URL;
+const { setUser } = useContext(AuthContext);
 
 function SignupPage() {
     const [error, setError] = useState("");
@@ -48,9 +49,10 @@ function SignupPage() {
                 last_name: formData.last_name,
                 phone: formData.phone,
             };
-            await axios.post(`${SERVER_URL}/api/users/register`, data);
+            const response = await axios.post(`${SERVER_URL}/api/users/register`, data);
             setSuccess(true);
             setError("");
+            setUser({ ...response.data.user, token: response.data.token });
             event.target.reset();
             navigate('/profile');
         } catch (error) {
