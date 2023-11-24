@@ -1,14 +1,15 @@
 import './SignUpPage.scss';
 import GoogleAuthButton from '../../components/GoogleAuthButton/GoogleAuthButton';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from "react-router-dom";
 import Input from "../../components/Input/Input";
+import { AuthContext } from '../../auth/AuthContext'
 
 const SERVER_URL = process.env.REACT_APP_SERVER_URL;
-const { setUser } = useContext(AuthContext);
 
 function SignupPage() {
+    const { setUser } = useContext(AuthContext);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
     const [formData, setFormData] = useState({
@@ -50,15 +51,20 @@ function SignupPage() {
                 phone: formData.phone,
             };
             const response = await axios.post(`${SERVER_URL}/api/users/register`, data);
+            sessionStorage.setItem('token', response.data.token);
+            setUser({ ...response.data.user, token: response.data.token });
             setSuccess(true);
             setError("");
+
             setUser({ ...response.data.user, token: response.data.token });
             event.target.reset();
+            console.log('User data set:', response.data.user);
             navigate('/profile');
         } catch (error) {
             setError(error.response?.data.message || 'Error signing up.');
         }
     };
+    
 
     const validateForm = () => {
         let isValid = true;

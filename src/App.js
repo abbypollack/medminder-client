@@ -10,7 +10,6 @@ import InteractionCheckPage from './pages/InteractionCheckPage/InteractionCheckP
 import MedicationHistoryPage from './pages/MedicationHistoryPage/MedicationHistoryPage';
 import ProfilePage from './pages/ProfilePage/ProfilePage';
 import NotFound from './pages/NotFound/NotFound';
-import AuthFailPage from './pages/AuthFailPage/AuthFailPage';
 import { AuthProvider } from './auth/AuthContext';
 
 
@@ -27,7 +26,6 @@ function App() {
           <Route path="/mymedications" element={<MyMedicationsPage />} />
           <Route path="/interactioncheck" element={<InteractionCheckPage />} />
           <Route path="/medicationhistory" element={<MedicationHistoryPage />} />
-          <Route path="auth-fail" element={<AuthFailPage />} />
           <Route element={NotFound} />
         </Routes>
         <Footer />

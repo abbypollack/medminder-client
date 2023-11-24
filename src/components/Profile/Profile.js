@@ -33,7 +33,7 @@ const Profile = () => {
       <h1>Profile Page</h1>
       {user && (
         <>
-          <h2>Hello, {user.username}</h2>
+          <h2>Hello, {user.first_name}</h2>
           <img className="profile-page__avatar" src={user.avatar_url} alt={`${user.username}'s avatar`} />
           <LogoutButton />
           <form onSubmit={handleSubmit}>
