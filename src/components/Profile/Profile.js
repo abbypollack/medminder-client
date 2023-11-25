@@ -1,19 +1,19 @@
 import { useContext } from 'react';
 import { AuthContext } from '../../auth/AuthContext';
-import LogoutButton from '../LogoutButton/LogoutButton';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const Profile = () => {
-  const API_URL = process.env.REACT_APP_SERVER_URL
+  const API_URL = process.env.REACT_APP_SERVER_URL;
   const { user, setUser } = useContext(AuthContext);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const profileData = Object.fromEntries(formData.entries());
-
+  
     try {
-      const response = await axios.post(`${API_URL}/updateProfile`, profileData, {
+      const response = await axios.patch(`${API_URL}/updateProfile`, profileData, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${user.token}`,
@@ -25,28 +25,48 @@ const Profile = () => {
       console.error('Error updating profile:', error);
       alert('Failed to update profile.');
     }
-  };
-
+  };  
 
   return (
     <section className="profile-page">
-      <h1>Profile Page</h1>
-      {user && (
-        <>
-          <h2>Hello, {user.first_name}</h2>
-          <img className="profile-page__avatar" src={user.avatar_url} alt={`${user.username}'s avatar`} />
-          <LogoutButton />
-          <form onSubmit={handleSubmit}>
-            {!user.firstName && <input name="firstName" placeholder="First Name" required />}
-            {!user.lastName && <input name="lastName" placeholder="Last Name" required />}
-            {!user.phone && <input name="phone" placeholder="Phone" required />}
-            <button type="submit">Update Profile</button>
-          </form>
-        </>
-      )}
+      <div>
+        <h1>Dashboard</h1>
+        <h3>Hello, {user?.first_Nme || user?.name || 'User'}! 👋</h3>
+        <div>
+          <Link to="/medicationhistory">
+            <button>Log today’s medication</button>
+          </Link>
+          <Link to="/view-medications">
+            <button>View my medications</button>
+          </Link>
+        </div>
+      </div>
+      <div>
+        <h2>Edit Profile</h2>
+        <form onSubmit={handleSubmit}>
+          <input
+            name="firstName"
+            placeholder="First Name"
+            required
+            defaultValue={user?.firstName}
+          />
+          <input
+            name="lastName"
+            placeholder="Last Name"
+            required
+            defaultValue={user?.lastName}
+          />
+          <input
+            name="phone"
+            placeholder="Phone Number"
+            required
+            defaultValue={user?.phone}
+          />
+          <button type="submit">Save Edits</button>
+        </form>
+      </div>
     </section>
   );
 };
 
 export default Profile;
-
