@@ -4,9 +4,7 @@ import Profile from '../../components/Profile/Profile';
 import Unauthenticated from '../../components/Unauthenticated/Unauthenticated';
 
 function ProfilePage() {
-  const { isLoggedIn, user } = useContext(AuthContext);
-  console.log('isLoggedIn state:', isLoggedIn);
-  console.log('User data:', user);
+  const { isLoggedIn } = useContext(AuthContext);
 
   if (!isLoggedIn) {
     return (

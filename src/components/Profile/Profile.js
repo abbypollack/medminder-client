@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../../auth/AuthContext';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
@@ -7,31 +7,44 @@ const Profile = () => {
   const API_URL = process.env.REACT_APP_SERVER_URL;
   const { user, setUser } = useContext(AuthContext);
 
+  const [formData, setFormData] = useState({
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    phone: user?.phone || '',
+  });
+
+  useEffect(() => {
+    setFormData({
+      firstName: user?.firstName || '',
+      lastName: user?.lastName || '',
+      phone: user?.phone || '',
+    });
+  }, [user]);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const formData = new FormData(event.target);
-    const profileData = Object.fromEntries(formData.entries());
   
     try {
-      const response = await axios.patch(`${API_URL}/updateProfile`, profileData, {
+      const response = await axios.patch(`${API_URL}/updateProfile`, JSON.stringify(formData), {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${user.token}`,
         },
-      });
+      });      
       setUser({ ...user, ...response.data.updatedUser });
       alert('Profile updated successfully!');
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error('Error updating profile:', error.response);
       alert('Failed to update profile.');
     }
-  };  
+  };
+  
 
   return (
     <section className="profile-page">
       <div>
         <h1>Dashboard</h1>
-        <h3>Hello, {user?.first_Nme || user?.name || 'User'}! 👋</h3>
+        <h3>Hello, {user?.firstName || user?.name || 'User'}! 👋</h3>
         <div>
           <Link to="/medicationhistory">
             <button>Log today’s medication</button>
@@ -48,19 +61,22 @@ const Profile = () => {
             name="firstName"
             placeholder="First Name"
             required
-            defaultValue={user?.firstName}
+            value={formData.firstName}
+            onChange={e => setFormData({ ...formData, firstName: e.target.value })}
           />
           <input
             name="lastName"
             placeholder="Last Name"
             required
-            defaultValue={user?.lastName}
+            value={formData.lastName}
+            onChange={e => setFormData({ ...formData, lastName: e.target.value })}
           />
           <input
             name="phone"
             placeholder="Phone Number"
             required
-            defaultValue={user?.phone}
+            value={formData.phone}
+            onChange={e => setFormData({ ...formData, phone: e.target.value })}
           />
           <button type="submit">Save Edits</button>
         </form>

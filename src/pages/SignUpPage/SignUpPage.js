@@ -13,8 +13,8 @@ function SignupPage() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
     const [formData, setFormData] = useState({
-        first_name: '',
-        last_name: '',
+        firstName: '',
+        lastName: '',
         phone: '',
         email: '',
         password: '',
@@ -46,8 +46,8 @@ function SignupPage() {
             const data = {
                 email: formData.email,
                 password: formData.password,
-                first_name: formData.first_name,
-                last_name: formData.last_name,
+                firstName: formData.firstName,
+                lastName: formData.lastName,
                 phone: formData.phone,
             };
             const response = await axios.post(`${SERVER_URL}/api/users/register`, data);
@@ -70,14 +70,14 @@ function SignupPage() {
         let isValid = true;
         let newErrors = {};
 
-        if (!formData.first_name.trim()) {
+        if (!formData.firstName.trim()) {
             isValid = false;
-            newErrors.first_name = 'First name is required.';
+            newErrors.firstName = 'First name is required.';
         }
 
-        if (!formData.last_name.trim()) {
+        if (!formData.lastName.trim()) {
             isValid = false;
-            newErrors.last_name = 'Last name is required.';
+            newErrors.lastName = 'Last name is required.';
         }
 
         if (!formData.phone.trim() || !/^\d{10}$/.test(formData.phone)) {
@@ -109,11 +109,11 @@ function SignupPage() {
             <form className="signup" onSubmit={handleSubmit}>
                 <h1 className="signup__title">Sign up</h1>
 
-                <Input type="text" name="first_name" label="First name" value={formData.first_name} onChange={handleChange} required />
-                {errors.first_name && <div className="signup__error">{errors.first_name}</div>}
+                <Input type="text" name="firstName" label="First name" value={formData.firstName} onChange={handleChange} required />
+                {errors.firstName && <div className="signup__error">{errors.firstName}</div>}
 
-                <Input type="text" name="last_name" label="Last name" value={formData.last_name} onChange={handleChange} required />
-                {errors.last_name && <div className="signup__error">{errors.last_name}</div>}
+                <Input type="text" name="lastName" label="Last name" value={formData.lastName} onChange={handleChange} required />
+                {errors.lastName && <div className="signup__error">{errors.lastName}</div>}
 
                 <Input type="tel" name="phone" label="Phone" value={formData.phone} onChange={handleChange} required pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number." />
                 {errors.phone && <div className="signup__error">{errors.phone}</div>}
