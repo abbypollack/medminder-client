@@ -1,10 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import './DrugInteractionInput.scss';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import useAutocomplete from '../UseAutocomplete/UseAutocomplete';
+import { AuthContext } from '../../auth/AuthContext';
 
 function DrugInteractionInput() {
+  const { isLoggedIn } = useContext(AuthContext);
+
   const SERVER_URL = process.env.REACT_APP_SERVER_URL;
   const [drugInputValue, setDrugInputValue] = useState('');
   const [strengthInputValue, setStrengthInputValue] = useState('');
@@ -90,7 +93,7 @@ function DrugInteractionInput() {
       setSelectedStrengthRxCUI('');
       setDrugInputValue('');
       setStrengthInputValue('');
-      handleSearch(newDrugsList); 
+      handleSearch(newDrugsList);
     }
   };
 
@@ -101,11 +104,17 @@ function DrugInteractionInput() {
   };
 
   const handleSaveToProfile = async (drugId) => {
+    if (!isLoggedIn) return;
+
     const drug = yourDrugs.find(d => d.id === drugId);
     if (!drug) return;
 
     try {
-      const response = await axios.post(`${SERVER_URL}/api/users/drugs`, { drug }, {
+      const response = await axios.post(`${SERVER_URL}/api/users/drugs`, {
+        drugName: drug.name,
+        strength: drug.strength,
+        rxnormId: drug.rxNormId
+      }, {
         headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
       });
       console.log("Saved to profile:", response.data);
@@ -113,6 +122,7 @@ function DrugInteractionInput() {
       console.error('Error saving drug to profile:', error);
     }
   };
+
 
   return (
     <div className="interaction-checker">
@@ -157,7 +167,7 @@ function DrugInteractionInput() {
         DISCLAIMER: The information contained herein should NOT be used as a substitute for
         the advice of an appropriately qualified and licensed physician or other health care provider.
       </p>
-      <h3 className="interaction-checker__drugs-title">Your Drugs</h3>
+      <h3 className="interaction-checker__drugs-title">My Medications</h3>
       <div className="interaction-checker__drugs-list">
         {yourDrugs.map((drug) => (
           <div className="interaction-checker__drug" key={drug.id}>
@@ -165,9 +175,11 @@ function DrugInteractionInput() {
             <button className="interaction-checker__remove-button" onClick={() => handleRemove(drug.id)}>
               Remove
             </button>
-            <button className="interaction-checker__save-button" onClick={() => handleSaveToProfile(drug.id)}>
-              Save to Profile
-            </button>
+            {isLoggedIn && (
+              <button className="interaction-checker__save-button" onClick={() => handleSaveToProfile(drug.id)}>
+                Save to Profile
+              </button>
+            )}
           </div>
         ))}
       </div>
