@@ -36,7 +36,7 @@ const Profile = () => {
           <Link to="/medicationhistory">
             <button>Log today’s medication</button>
           </Link>
-          <Link to="/view-medications">
+          <Link to="/mymedications">
             <button>View my medications</button>
           </Link>
         </div>

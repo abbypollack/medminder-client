@@ -1,6 +1,5 @@
 import { useState, useContext } from 'react';
-import { Link } from 'react-router-dom';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { MdClose } from 'react-icons/md';
 import { FiMenu } from 'react-icons/fi';
 import MobileMenu from './../MobileMenu/MobileMenu';
@@ -70,22 +69,20 @@ function Header() {
 
                     {!isLoggedIn && (
                         <>
-                    <li className="header__nav-item">
-                        <NavLink to="/login" className="header__nav-link">
-                            Log In
-                        </NavLink>
-                    </li>
-                    <li className="header__nav-item">
-                        <NavLink to="/signup" className="header__nav-link">
-                            Sign Up
-                        </NavLink>
-                    </li>
-                    </>
+                            <li className="header__nav-item">
+                                <NavLink to="/login" className="header__nav-link">
+                                    Log In
+                                </NavLink>
+                            </li>
+                            <li className="header__nav-item">
+                                <NavLink to="/signup" className="header__nav-link">
+                                    Sign Up
+                                </NavLink>
+                            </li>
+                        </>
                     )}
-                     {isLoggedIn && (
-                        <li className="header__nav-item">
-                            <LogoutButton  />
-                        </li>
+                    {isLoggedIn && (
+                        <LogoutButton />
                     )}
                 </ul>
             </nav>

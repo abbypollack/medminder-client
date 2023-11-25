@@ -16,7 +16,7 @@ const LogoutButton = () => {
   return (
 
     <li className="header__nav-item">
-      <Link className="header__nav-link header__nav-link--logout" onClick={handleLogout}>
+      <Link className="header__nav-link" onClick={handleLogout}>
         Log Out
       </Link>
     </li>

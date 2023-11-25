@@ -1,8 +1,12 @@
 import './Footer.scss'
 import { NavLink, Link } from 'react-router-dom';
 import logo from '../../assets/icons/logo.svg';
+import { AuthContext } from '../../auth/AuthContext';
+import { useContext } from 'react';
+import LogoutButton from '../LogoutButton/LogoutButton'
 
 function Footer() {
+    const { isLoggedIn } = useContext(AuthContext);
     return (
         <footer className="footer">
             <div className="footer__logo-container">
@@ -41,17 +45,28 @@ function Footer() {
                                 My Meds
                             </NavLink>
                         </li>
-                        <li className="footer__nav-item">
-                            <NavLink to="/login" className="footer__nav-link">
-                                Log In
-                            </NavLink>
-                        </li>
-                        <li className="footer__nav-item">
-                            <NavLink to="/signup" className="footer__nav-link">
-                                Sign Up
-                            </NavLink>
-                        </li>
+                        {!isLoggedIn && (
+                            <div className="footer__nav-column">
+                                <li className="footer__nav-item">
+                                    <NavLink to="/login" className="footer__nav-link">
+                                        Log In
+                                    </NavLink>
+                                </li>
+                                <li className="footer__nav-item">
+                                    <NavLink to="/signup" className="footer__nav-link">
+                                        Sign Up
+                                    </NavLink>
+                                </li>
+                            </div>
+                        )}
                     </div>
+                    {isLoggedIn && (
+                        <div className="footer__nav-column">
+                            <li className="footer__nav-item">
+                                < LogoutButton />
+                            </li>
+                        </div>
+                    )}
                 </ul>
             </nav>
             <p className="footer__copyright">&copy; 2023 MedMinder. All rights reserved.</p>
