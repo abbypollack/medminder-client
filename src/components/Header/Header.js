@@ -1,14 +1,17 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
 import { MdClose } from 'react-icons/md';
 import { FiMenu } from 'react-icons/fi';
 import MobileMenu from './../MobileMenu/MobileMenu';
 import logo from '../../assets/icons/logo.svg'
+import { AuthContext } from '../../auth/AuthContext';
 import './Header.scss'
+import LogoutButton from '../LogoutButton/LogoutButton'
 
 function Header() {
     const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { isLoggedIn } = useContext(AuthContext);
 
     const toggleMobileMenu = () => {
         setMobileMenuOpen((prev) => !prev);
@@ -64,6 +67,9 @@ function Header() {
                             Profile
                         </NavLink>
                     </li>
+
+                    {!isLoggedIn && (
+                        <>
                     <li className="header__nav-item">
                         <NavLink to="/login" className="header__nav-link">
                             Log In
@@ -74,6 +80,13 @@ function Header() {
                             Sign Up
                         </NavLink>
                     </li>
+                    </>
+                    )}
+                     {isLoggedIn && (
+                        <li className="header__nav-item">
+                            <LogoutButton  />
+                        </li>
+                    )}
                 </ul>
             </nav>
             <MobileMenu isOpen={isMobileMenuOpen} onClose={closeMobileMenu} />

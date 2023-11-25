@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { AuthContext } from '../../auth/AuthContext';
 import './MobileMenu.scss';
 
 const MobileMenu = ({ isOpen, onClose }) => {
