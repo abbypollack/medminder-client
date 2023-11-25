@@ -1,14 +1,16 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { NavLink } from 'react-router-dom';
+import { useState, useContext } from 'react';
+import { NavLink, Link } from 'react-router-dom';
 import { MdClose } from 'react-icons/md';
 import { FiMenu } from 'react-icons/fi';
 import MobileMenu from './../MobileMenu/MobileMenu';
 import logo from '../../assets/icons/logo.svg'
+import { AuthContext } from '../../auth/AuthContext';
 import './Header.scss'
+import LogoutButton from '../LogoutButton/LogoutButton'
 
 function Header() {
     const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { isLoggedIn } = useContext(AuthContext);
 
     const toggleMobileMenu = () => {
         setMobileMenuOpen((prev) => !prev);
@@ -64,16 +66,24 @@ function Header() {
                             Profile
                         </NavLink>
                     </li>
-                    <li className="header__nav-item">
-                        <NavLink to="/login" className="header__nav-link">
-                            Log In
-                        </NavLink>
-                    </li>
-                    <li className="header__nav-item">
-                        <NavLink to="/signup" className="header__nav-link">
-                            Sign Up
-                        </NavLink>
-                    </li>
+
+                    {!isLoggedIn && (
+                        <>
+                            <li className="header__nav-item">
+                                <NavLink to="/login" className="header__nav-link">
+                                    Log In
+                                </NavLink>
+                            </li>
+                            <li className="header__nav-item">
+                                <NavLink to="/signup" className="header__nav-link">
+                                    Sign Up
+                                </NavLink>
+                            </li>
+                        </>
+                    )}
+                    {isLoggedIn && (
+                        <LogoutButton />
+                    )}
                 </ul>
             </nav>
             <MobileMenu isOpen={isMobileMenuOpen} onClose={closeMobileMenu} />
