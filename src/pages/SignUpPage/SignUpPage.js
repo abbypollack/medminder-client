@@ -58,7 +58,6 @@ function SignupPage() {
 
             setUser({ ...response.data.user, token: response.data.token });
             event.target.reset();
-            console.log('User data set:', response.data.user);
             navigate('/profile');
         } catch (error) {
             setError(error.response?.data.message || 'Error signing up.');

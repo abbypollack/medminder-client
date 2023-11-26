@@ -10,8 +10,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 function DrugInteractionInput() {
   const { isLoggedIn } = useContext(AuthContext);
+  const { suggestions, fetchSuggestions, loading } = useAutocomplete('https://clinicaltables.nlm.nih.gov/api/rxterms/v3/search');
 
   const SERVER_URL = process.env.REACT_APP_SERVER_URL;
+
   const [showModal, setShowModal] = useState(false);
   const [reminderFrequency, setReminderFrequency] = useState('');
   const [reminderTimes, setReminderTimes] = useState([]);
@@ -25,13 +27,28 @@ function DrugInteractionInput() {
   const [selectedStrength, setSelectedStrength] = useState('');
   const [selectedStrengthRxCUI, setSelectedStrengthRxCUI] = useState('');
 
-  const { suggestions, fetchSuggestions, loading } = useAutocomplete('https://clinicaltables.nlm.nih.gov/api/rxterms/v3/search');
-
   useEffect(() => {
     if (drugInputValue.length > 0) {
       fetchSuggestions(drugInputValue);
     }
   }, [drugInputValue]);
+
+  const fetchUserMedications = async () => {
+    try {
+      const response = await axios.get(`${SERVER_URL}/api/users/drugs`, {
+        headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
+      });
+      setYourDrugs(response.data.medications);
+    } catch (error) {
+      console.error('Error fetching user medications:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchUserMedications();
+    }
+  }, [isLoggedIn]);
 
   const handleStrengthSelect = (strength, rxNormId) => {
     setSelectedStrength(strength);
@@ -54,6 +71,7 @@ function DrugInteractionInput() {
       setSelectedStrengthRxCUI('');
     }
   };
+
 
   const handleFrequencyChange = (e) => {
     const frequency = e.target.value;
@@ -106,7 +124,6 @@ function DrugInteractionInput() {
 
     try {
       const response = await axios.post(apiUrl, { drugs: yourDrugs.map((drug) => drug.rxNormId) });
-      console.log("API Response:", response);
 
       const formattedInteractions = response.data.fullInteractionTypeGroup?.flatMap(group =>
         group.fullInteractionType.flatMap(type =>
@@ -116,7 +133,6 @@ function DrugInteractionInput() {
           }))
         )
       ) || [];
-      console.log("Formatted Interactions:", formattedInteractions);
       setInteractions(formattedInteractions);
     } catch (error) {
       console.error('Error fetching drug interactions:', error);
@@ -130,21 +146,20 @@ function DrugInteractionInput() {
   const handleAddDrug = () => {
     if (selectedDrug && selectedStrength && selectedStrengthRxCUI) {
       const drugToAdd = {
-        name: selectedDrug.name,
+        drug_name: selectedDrug.name,
         strength: selectedStrength,
         rxNormId: selectedStrengthRxCUI,
         id: uuidv4()
       };
-      const newDrugsList = [...yourDrugs, drugToAdd];
-      setYourDrugs(newDrugsList);
+      setYourDrugs([...yourDrugs, drugToAdd]);
       setSelectedDrug(null);
       setSelectedStrength('');
       setSelectedStrengthRxCUI('');
       setDrugInputValue('');
       setStrengthInputValue('');
-      handleSearch(newDrugsList);
     }
   };
+
 
   const handleRemove = (id) => {
     const updatedDrugs = yourDrugs.filter((drug) => drug.id !== id);
@@ -172,7 +187,6 @@ function DrugInteractionInput() {
       }, {
         headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
       });
-      console.log("Saved to profile:", response.data);
       setShowModal(false);
       setReminderFrequency('');
       setReminderTimes([]);
@@ -230,12 +244,13 @@ function DrugInteractionInput() {
       <div className="interaction-checker__drugs-list">
         {yourDrugs.map((drug) => (
           <div className="interaction-checker__drug" key={drug.id}>
-            <span className="interaction-checker__drug-name">{`${drug.name} - ${drug.strength}`}</span>
-            <button className="interaction-checker__remove-button" onClick={() => handleRemove(drug.id)}>
-              Remove
-            </button>
+            <span className="interaction-checker__drug-name">{`${drug.drug_name} - ${drug.strength}`}</span>
+            <button className="interaction-checker__remove-button" onClick={() => handleRemove(drug.id)}>Remove</button>
             {isLoggedIn && (
-              <button className="interaction-checker__save-button" onClick={() => handleSaveToProfileModal(drug.id)}>
+              <button
+                className="interaction-checker__save-button"
+                onClick={() => handleSaveToProfileModal(drug.id)}
+              >
                 Save to Profile
               </button>
             )}
@@ -301,4 +316,3 @@ function DrugInteractionInput() {
   );
 }
 export default DrugInteractionInput;
-

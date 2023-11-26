@@ -14,20 +14,16 @@ export const AuthProvider = ({ children }) => {
     }
     setIsLoggedIn(!!userData);
     setUserState(userData);
-    console.log('isLoggedIn:', !!userData, 'User:', userData);
   };
   
 
   useEffect(() => {
-    console.log('useEffect triggered in AuthProvider');
     const token = sessionStorage.getItem('token');
-    console.log('Token from session storage:', token);
     if (token) {
       axios.get(`${SERVER_URL}/api/users/current`, { 
         headers: { Authorization: `Bearer ${token}` } 
       })
       .then((res) => {
-        console.log('User data from /current:', res.data);
         setUserAndLogin(res.data, token);
       })
       .catch((error) => {

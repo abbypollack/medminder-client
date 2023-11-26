@@ -27,7 +27,6 @@ const LoginPage = () => {
         headers: { Authorization: `Bearer ${response.data.token}` }
       }).then((userData) => {
         setUser({ ...userData.data.user, token: response.data.token });
-        console.log('User data set:', userData.data.user);
         navigate('/profile');
       }).catch(error => {
         console.error('Error fetching user data:', error);
