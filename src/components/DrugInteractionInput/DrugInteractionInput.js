@@ -1,12 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import './DrugInteractionInput.scss';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import useAutocomplete from '../UseAutocomplete/UseAutocomplete';
+import { AuthContext } from '../../auth/AuthContext';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function DrugInteractionInput() {
+  const { isLoggedIn } = useContext(AuthContext);
+  const { suggestions, fetchSuggestions, loading } = useAutocomplete('https://clinicaltables.nlm.nih.gov/api/rxterms/v3/search');
+
   const SERVER_URL = process.env.REACT_APP_SERVER_URL;
+
+  const [showModal, setShowModal] = useState(false);
+  const [reminderFrequency, setReminderFrequency] = useState('');
+  const [reminderTimes, setReminderTimes] = useState([]);
   const [drugInputValue, setDrugInputValue] = useState('');
+  const [currentDrugId, setCurrentDrugId] = useState(null);
   const [strengthInputValue, setStrengthInputValue] = useState('');
   const [selectedDrug, setSelectedDrug] = useState(null);
   const [strengths, setStrengths] = useState([]);
@@ -15,13 +27,28 @@ function DrugInteractionInput() {
   const [selectedStrength, setSelectedStrength] = useState('');
   const [selectedStrengthRxCUI, setSelectedStrengthRxCUI] = useState('');
 
-  const { suggestions, fetchSuggestions, loading } = useAutocomplete('https://clinicaltables.nlm.nih.gov/api/rxterms/v3/search');
-
   useEffect(() => {
     if (drugInputValue.length > 0) {
       fetchSuggestions(drugInputValue);
     }
   }, [drugInputValue]);
+
+  const fetchUserMedications = async () => {
+    try {
+      const response = await axios.get(`${SERVER_URL}/api/users/drugs`, {
+        headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
+      });
+      setYourDrugs(response.data.medications);
+    } catch (error) {
+      console.error('Error fetching user medications:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchUserMedications();
+    }
+  }, [isLoggedIn]);
 
   const handleStrengthSelect = (strength, rxNormId) => {
     setSelectedStrength(strength);
@@ -45,6 +72,49 @@ function DrugInteractionInput() {
     }
   };
 
+
+  const handleFrequencyChange = (e) => {
+    const frequency = e.target.value;
+    setReminderFrequency(frequency);
+
+    let numberOfInputs;
+    switch (frequency) {
+      case 'Daily':
+        numberOfInputs = 1;
+        break;
+      case '2 times a day':
+        numberOfInputs = 2;
+        break;
+      case '3 times a day':
+        numberOfInputs = 3;
+        break;
+      case '4 times a day':
+        numberOfInputs = 4;
+        break;
+      case '5 times a day':
+        numberOfInputs = 5;
+        break;
+      case '6 times a day':
+        numberOfInputs = 6;
+        break;
+      case '8 times a day':
+        numberOfInputs = 8;
+        break;
+      default:
+        numberOfInputs = 1;
+    }
+
+    setReminderTimes(Array(numberOfInputs).fill(''));
+  };
+
+  const handleTimeChange = (index, time) => {
+    setReminderTimes(prev => {
+      const updatedTimes = [...prev];
+      updatedTimes[index] = time;
+      return updatedTimes;
+    });
+  };
+
   const handleSearch = async () => {
     if (yourDrugs.length < 2) {
       setInteractions([]);
@@ -54,7 +124,6 @@ function DrugInteractionInput() {
 
     try {
       const response = await axios.post(apiUrl, { drugs: yourDrugs.map((drug) => drug.rxNormId) });
-      console.log("API Response:", response);
 
       const formattedInteractions = response.data.fullInteractionTypeGroup?.flatMap(group =>
         group.fullInteractionType.flatMap(type =>
@@ -64,7 +133,6 @@ function DrugInteractionInput() {
           }))
         )
       ) || [];
-      console.log("Formatted Interactions:", formattedInteractions);
       setInteractions(formattedInteractions);
     } catch (error) {
       console.error('Error fetching drug interactions:', error);
@@ -78,21 +146,20 @@ function DrugInteractionInput() {
   const handleAddDrug = () => {
     if (selectedDrug && selectedStrength && selectedStrengthRxCUI) {
       const drugToAdd = {
-        name: selectedDrug.name,
+        drug_name: selectedDrug.name,
         strength: selectedStrength,
         rxNormId: selectedStrengthRxCUI,
         id: uuidv4()
       };
-      const newDrugsList = [...yourDrugs, drugToAdd];
-      setYourDrugs(newDrugsList);
+      setYourDrugs([...yourDrugs, drugToAdd]);
       setSelectedDrug(null);
       setSelectedStrength('');
       setSelectedStrengthRxCUI('');
       setDrugInputValue('');
       setStrengthInputValue('');
-      handleSearch(newDrugsList); 
     }
   };
+
 
   const handleRemove = (id) => {
     const updatedDrugs = yourDrugs.filter((drug) => drug.id !== id);
@@ -100,19 +167,35 @@ function DrugInteractionInput() {
     handleSearch(updatedDrugs);
   };
 
-  const handleSaveToProfile = async (drugId) => {
-    const drug = yourDrugs.find(d => d.id === drugId);
+  const handleSaveToProfileModal = (drugId) => {
+    if (!isLoggedIn) return;
+    setCurrentDrugId(drugId);
+    setShowModal(true);
+  };
+
+  const handleSaveToProfile = async () => {
+    const drug = yourDrugs.find(d => d.id === currentDrugId);
     if (!drug) return;
 
     try {
-      const response = await axios.post(`${SERVER_URL}/api/users/drugs`, { drug }, {
+      const response = await axios.post(`${SERVER_URL}/api/users/drugs`, {
+        drugName: drug.name,
+        strength: drug.strength,
+        rxnormId: drug.rxNormId,
+        reminderFrequency,
+        reminderTimes
+      }, {
         headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
       });
-      console.log("Saved to profile:", response.data);
+      setShowModal(false);
+      setReminderFrequency('');
+      setReminderTimes([]);
     } catch (error) {
       console.error('Error saving drug to profile:', error);
     }
   };
+
+
 
   return (
     <div className="interaction-checker">
@@ -157,17 +240,20 @@ function DrugInteractionInput() {
         DISCLAIMER: The information contained herein should NOT be used as a substitute for
         the advice of an appropriately qualified and licensed physician or other health care provider.
       </p>
-      <h3 className="interaction-checker__drugs-title">Your Drugs</h3>
+      <h3 className="interaction-checker__drugs-title">My Medications</h3>
       <div className="interaction-checker__drugs-list">
         {yourDrugs.map((drug) => (
           <div className="interaction-checker__drug" key={drug.id}>
-            <span className="interaction-checker__drug-name">{`${drug.name} - ${drug.strength}`}</span>
-            <button className="interaction-checker__remove-button" onClick={() => handleRemove(drug.id)}>
-              Remove
-            </button>
-            <button className="interaction-checker__save-button" onClick={() => handleSaveToProfile(drug.id)}>
-              Save to Profile
-            </button>
+            <span className="interaction-checker__drug-name">{`${drug.drug_name} - ${drug.strength}`}</span>
+            <button className="interaction-checker__remove-button" onClick={() => handleRemove(drug.id)}>Remove</button>
+            {isLoggedIn && (
+              <button
+                className="interaction-checker__save-button"
+                onClick={() => handleSaveToProfileModal(drug.id)}
+              >
+                Save to Profile
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -187,8 +273,46 @@ function DrugInteractionInput() {
         )}
       </div>
 
+      {/* Modal for setting reminders */}
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Set Medication Reminder</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div>
+            <label>Reminder Frequency:</label>
+            <select value={reminderFrequency} onChange={handleFrequencyChange}>
+              <option value="">Select frequency</option>
+              <option value="Daily">Daily</option>
+              <option value="2 times a day">2 times a day</option>
+              <option value="3 times a day">3 times a day</option>
+              <option value="4 times a day">4 times a day</option>
+              <option value="5 times a day">5 times a day</option>
+              <option value="6 times a day">6 times a day</option>
+              <option value="8 times a day">8 times a day</option>
+            </select>
+          </div>
+          {reminderTimes.map((time, index) => (
+            <div key={index}>
+              <label>Reminder Time {index + 1}:</label>
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => handleTimeChange(index, e.target.value)}
+              />
+            </div>
+          ))}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleSaveToProfile}>
+            Set Reminder(s)
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
 export default DrugInteractionInput;
-
