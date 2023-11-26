@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../../auth/AuthContext';
 import './MedicationHistory.scss';
+import DailyAdherenceCalendar from '../DailyAdherenceCalendar/DailyAdherenceCalendar';
 
 function MedicationHistory() {
     const { user } = useContext(AuthContext);
@@ -73,20 +74,12 @@ function MedicationHistory() {
 
     const messageAllTaken = `${user?.firstName || 'User'}, you've taken all your medications for today!`;
 
-    const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 
     return (
         <div className="medication-history">
             <h1>Medication History</h1>
-            <div className="week-days">
-                {weekDays.map(day => (
-                    <div key={day} className="day">
-                        <span className="day-label">{day}</span>
-                        <div className="circle"></div>
-                    </div>
-                ))}
-            </div>
+            <DailyAdherenceCalendar loggedMedications={loggedMedications} />
             <h2>Today’s Log</h2>
             {allTaken ? (
                 <p>{messageAllTaken}</p>
