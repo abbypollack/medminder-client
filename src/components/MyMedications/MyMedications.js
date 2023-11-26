@@ -26,6 +26,10 @@ function MyMedications() {
         }
     }, [isLoggedIn]);
 
+    useEffect(() => {
+        fetchInteractions();
+    }, [medications]);
+
 
     const fetchMedications = async () => {
         try {
@@ -52,6 +56,7 @@ function MyMedications() {
                 headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
             });
             fetchMedications();
+            fetchInteractions();
         } catch (error) {
             console.error('Error saving medication:', error);
         }
@@ -74,6 +79,7 @@ function MyMedications() {
                 headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
             });
             fetchMedications();
+            fetchInteractions();
         } catch (error) {
             console.error('Error updating medication:', error);
         }
@@ -87,6 +93,7 @@ function MyMedications() {
                 headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
             });
             fetchMedications();
+            fetchInteractions();
         } catch (error) {
             console.error('Error removing medication:', error);
         }
@@ -224,19 +231,18 @@ function MyMedications() {
     const handleStrengthSelect = (strength) => {
         setSelectedMedication({ ...selectedMedication, strength });
     };
-    
+
     const fetchInteractions = async () => {
         if (medications.length < 2) {
             setInteractions([]);
             return;
         }
+        const rxNormIds = medications.map(medication => medication.rxNormId);
         const apiUrl = `${SERVER_URL}/api/drug/interactions`;
-    
+
         try {
-            const response = await axios.post(apiUrl, {
-                drugs: medications.map((medication) => medication.rxNormId),
-            });
-    
+            const response = await axios.post(apiUrl, { drugs: rxNormIds });
+
             if (response.status === 200) {
                 const formattedInteractions =
                     response.data.fullInteractionTypeGroup?.flatMap((group) =>
@@ -255,7 +261,7 @@ function MyMedications() {
             console.error('Error fetching drug interactions:', error);
         }
     };
-    
+
 
 
     return (
