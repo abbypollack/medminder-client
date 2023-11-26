@@ -35,12 +35,19 @@ function DrugInteractionInput() {
 
   const fetchUserMedications = async () => {
     try {
+      const token = sessionStorage.getItem('token');
+      if (!token) throw new Error('No token provided');
+
       const response = await axios.get(`${SERVER_URL}/api/users/drugs`, {
         headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
       });
       setYourDrugs(response.data.medications);
     } catch (error) {
-      console.error('Error fetching user medications:', error);
+      if (error.response?.status === 401) {
+        console.error('Unauthorized: ', error);
+      } else {
+        console.error('Error fetching user medications:', error);
+      }
     }
   };
 
@@ -116,14 +123,16 @@ function DrugInteractionInput() {
   };
 
   const handleSearch = async () => {
-    if (yourDrugs.length < 2) {
+    const validDrugs = yourDrugs.map(drug => drug.rxNormId).filter(id => id != null);
+
+    if (validDrugs.length < 2) {
       setInteractions([]);
       return;
     }
-    const apiUrl = `${SERVER_URL}/api/drug/interactions`;
 
+    const apiUrl = `${SERVER_URL}/api/drug/interactions`;
     try {
-      const response = await axios.post(apiUrl, { drugs: yourDrugs.map((drug) => drug.rxNormId) });
+      const response = await axios.post(apiUrl, { drugs: validDrugs });
 
       const formattedInteractions = response.data.fullInteractionTypeGroup?.flatMap(group =>
         group.fullInteractionType.flatMap(type =>
@@ -140,24 +149,32 @@ function DrugInteractionInput() {
   };
 
   useEffect(() => {
-    handleSearch();
-  }, [yourDrugs]);
+    if (isLoggedIn && yourDrugs.length >= 2) {
+      handleSearch();
+    }
+  }, [isLoggedIn, yourDrugs]);
+
+
 
   const handleAddDrug = () => {
-    if (selectedDrug && selectedStrength && selectedStrengthRxCUI) {
-      const drugToAdd = {
-        drug_name: selectedDrug.name,
-        strength: selectedStrength,
-        rxNormId: selectedStrengthRxCUI,
-        id: uuidv4()
-      };
-      setYourDrugs([...yourDrugs, drugToAdd]);
-      setSelectedDrug(null);
-      setSelectedStrength('');
-      setSelectedStrengthRxCUI('');
-      setDrugInputValue('');
-      setStrengthInputValue('');
+    if (!selectedDrug || !selectedDrug.name || !selectedStrength || !selectedStrengthRxCUI) {
+      console.error('Invalid drug or strength selection');
+      return;
     }
+
+    const drugToAdd = {
+      drug_name: selectedDrug.name,
+      strength: selectedStrength,
+      rxNormId: selectedStrengthRxCUI,
+      id: uuidv4()
+    };
+
+    setYourDrugs([...yourDrugs, drugToAdd]);
+    setSelectedDrug(null);
+    setSelectedStrength('');
+    setSelectedStrengthRxCUI('');
+    setDrugInputValue('');
+    setStrengthInputValue('');
   };
 
 
@@ -175,11 +192,15 @@ function DrugInteractionInput() {
 
   const handleSaveToProfile = async () => {
     const drug = yourDrugs.find(d => d.id === currentDrugId);
-    if (!drug) return;
+
+    if (!drug || !drug.drug_name) {
+      console.error('Drug name is required');
+      return;
+    }
 
     try {
       const response = await axios.post(`${SERVER_URL}/api/users/drugs`, {
-        drugName: drug.name,
+        drugName: drug.drug_name,
         strength: drug.strength,
         rxnormId: drug.rxNormId,
         reminderFrequency,
@@ -194,8 +215,6 @@ function DrugInteractionInput() {
       console.error('Error saving drug to profile:', error);
     }
   };
-
-
 
   return (
     <div className="interaction-checker">
