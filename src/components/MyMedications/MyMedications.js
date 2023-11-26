@@ -43,7 +43,7 @@ function MyMedications() {
         const data = {
             drugName: selectedMedication.name,
             strength: selectedMedication.strength,
-            rxnormId: selectedMedication.rxNormId,
+            rxNormId: selectedMedication.rxNormId,
             reminderFrequency: selectedMedication.frequency,
         };
 
@@ -65,7 +65,7 @@ function MyMedications() {
             id: selectedMedication.id,
             drugName: selectedMedication.name,
             strength: selectedMedication.strength,
-            rxnormId: selectedMedication.rxNormId,
+            rxNormId: selectedMedication.rxNormId,
             reminderFrequency: selectedMedication.frequency,
         };
 
