@@ -29,14 +29,22 @@ function MedicationHistory() {
         }
     };
 
-    const handleMedicationAction = async (medicationId, action) => {
+    const handleMedicationAction = async (medicationId, action, time) => {
         try {
-            await axios.post(`${SERVER_URL}/api/medications/${medicationId}/${action}`, {}, {
+            const response = await axios.post(`${SERVER_URL}/api/medications/${medicationId}/${action}`, {}, {
                 headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
             });
+
+            const { drug_name, strength, action_time } = response.data;
+
             setLoggedMedications(prevLoggedMedications => [
                 ...prevLoggedMedications,
-                { ...medications.find(med => med.id === medicationId), action }
+                {
+                    drug_name,
+                    strength,
+                    action,
+                    action_time
+                }
             ]);
             setMedications(prevMedications => prevMedications.filter(med => med.id !== medicationId));
         } catch (error) {
@@ -63,16 +71,18 @@ function MedicationHistory() {
                 medication.reminder_times.map((time, index) => (
                     <div key={`${medication.id}-${index}`} className="medication-reminder">
                         <p>{user?.firstName || 'User'}, remember to take {medication.drug_name} at {time}</p>
-                        <button onClick={() => handleMedicationAction(medication.id, 'skipped')}>Skipped</button>
-                        <button onClick={() => handleMedicationAction(medication.id, 'taken')}>Taken</button>
+                        <button onClick={() => handleMedicationAction(medication.id, 'skipped', time)}>Skipped</button>
+                        <button onClick={() => handleMedicationAction(medication.id, 'taken', time)}>Taken</button>
                     </div>
                 ))
             ))}
 
             <h3>Logged today:</h3>
             <ul>
-                {loggedMedications.map((medication) => (
-                    <li key={medication.id}>{medication.name} - {medication.action}</li>
+                {loggedMedications.map((log, index) => (
+                    <li key={index}>
+                        {log.drug_name} - {log.strength} - {log.action} at {new Date(log.action_time).toLocaleTimeString()}
+                    </li>
                 ))}
             </ul>
         </div>
