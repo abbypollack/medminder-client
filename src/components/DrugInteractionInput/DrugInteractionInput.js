@@ -184,6 +184,7 @@ function DrugInteractionInput() {
     setSelectedStrengthRxCUI('');
     setDrugInputValue('');
     setStrengthInputValue('');
+    setStrengths([]);
   };
 
 
