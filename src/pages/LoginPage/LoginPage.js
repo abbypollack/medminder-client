@@ -1,6 +1,7 @@
 import './LoginPage.scss'
 import Input from "../../components/Input/Input";
 import GoogleAuthButton from '../../components/GoogleAuthButton/GoogleAuthButton';
+import FacebookAuthButton from '../../components/FacebookAuthButton/FacebookAuthButton';
 import { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
@@ -52,6 +53,7 @@ const LoginPage = () => {
         Need an account? <Link to="/signup">Sign up</Link>
       </p>
       <GoogleAuthButton buttonText="Login" />
+      <FacebookAuthButton buttonText="Login" />
     </main>
   );
 }

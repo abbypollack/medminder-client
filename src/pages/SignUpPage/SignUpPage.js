@@ -1,5 +1,6 @@
 import './SignUpPage.scss';
 import GoogleAuthButton from '../../components/GoogleAuthButton/GoogleAuthButton';
+import FacebookAuthButton from '../../components/FacebookAuthButton/FacebookAuthButton';
 import { useState, useContext } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from "react-router-dom";
@@ -128,6 +129,7 @@ function SignupPage() {
 
                 <button className="signup__button">Sign up</button>
                 <GoogleAuthButton buttonText="Sign Up" />
+                <FacebookAuthButton buttonText="Sign Up" />
 
                 {success && <div className="signup__message">Signed up!</div>}
                 {error && <div className="signup__error">{error}</div>}
