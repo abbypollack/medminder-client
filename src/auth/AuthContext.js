@@ -11,15 +11,20 @@ export const AuthProvider = ({ children }) => {
   const setUserAndLogin = (userData, token = null) => {
     if (userData && token) {
       sessionStorage.setItem('token', token);
+      sessionStorage.setItem('userData', JSON.stringify(userData));
     }
     setIsLoggedIn(!!userData);
     setUserState(userData);
   };
-  
 
   useEffect(() => {
     const token = sessionStorage.getItem('token');
-    if (token) {
+    const savedUserData = sessionStorage.getItem('userData');
+
+    if (token && savedUserData) {
+      const userData = JSON.parse(savedUserData);
+      setUserAndLogin(userData, token);
+    } else if (token) {
       axios.get(`${SERVER_URL}/api/users/current`, { 
         headers: { Authorization: `Bearer ${token}` } 
       })
@@ -32,10 +37,11 @@ export const AuthProvider = ({ children }) => {
       });
     }
   }, []);
-  
+
   return (
     <AuthContext.Provider value={{ isLoggedIn, user, setUser: setUserAndLogin }}>
       {children}
     </AuthContext.Provider>
   );
 };
+

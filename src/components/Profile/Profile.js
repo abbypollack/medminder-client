@@ -25,7 +25,7 @@ const Profile = () => {
     event.preventDefault();
   
     try {
-      const response = await axios.patch(`${API_URL}/updateProfile`, JSON.stringify(formData), {
+      const response = await axios.patch(`${API_URL}/api/users/updateProfile`, JSON.stringify(formData), {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${user.token}`,

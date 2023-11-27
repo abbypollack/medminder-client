@@ -36,46 +36,52 @@ function MyMedications() {
             const response = await axios.get(`${SERVER_URL}/api/users/drugs`, {
                 headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
             });
+            console.log('Fetched medications:', response.data.medications);
             setMedications(response.data.medications);
         } catch (error) {
             console.error('Error fetching medications:', error);
         }
     };
+    
 
     const handleAddMedication = async () => {
-        const url = `${SERVER_URL}/api/users/drugs`;
-        const data = {
+        const medicationData = {
             drugName: selectedMedication.name,
             strength: selectedMedication.strength,
             rxNormId: selectedMedication.rxNormId,
-            reminderFrequency: selectedMedication.frequency,
+            reminderFrequency,
+            reminderTimes
         };
+        console.log('medication data:', medicationData)
+        const url = `${SERVER_URL}/api/users/drugs`;
 
         try {
-            await axios.post(url, data, {
+            await axios.post(url, medicationData, {
                 headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
             });
             fetchMedications();
             fetchInteractions();
         } catch (error) {
-            console.error('Error saving medication:', error);
+            console.error('Error adding medication:', error);
         }
 
         handleModalClose();
     };
 
+
     const handleEditMedication = async () => {
-        const url = `${SERVER_URL}/api/users/drugs/${selectedMedication.id}`;
-        const data = {
-            id: selectedMedication.id,
-            drugName: selectedMedication.name,
+        const medicationData = {
+            drugName: selectedMedication.drug_name,
             strength: selectedMedication.strength,
             rxNormId: selectedMedication.rxNormId,
-            reminderFrequency: selectedMedication.frequency,
+            reminderFrequency,
+            reminderTimes
         };
 
+        const url = `${SERVER_URL}/api/users/drugs/${selectedMedication.id}`;
+
         try {
-            await axios.patch(url, data, {
+            await axios.patch(url, medicationData, {
                 headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
             });
             fetchMedications();
@@ -86,6 +92,7 @@ function MyMedications() {
 
         handleModalClose();
     };
+
 
     const handleRemoveMedication = async () => {
         try {
@@ -121,18 +128,30 @@ function MyMedications() {
 
     const handleModalOpen = (mode, medication = null) => {
         setModalMode(mode);
-        if (medication) {
+        if (mode === 'add') {
+            setSelectedMedication({ id: '', name: '', strength: '', frequency: '' });
+            setReminderFrequency('');
+            setReminderTimes([]);
+        } else if (mode === 'edit' && medication) {
             setSelectedMedication({
                 id: medication.id,
                 name: medication.drug_name,
                 strength: medication.strength,
-                frequency: medication.reminder_frequency
+                frequency: medication.reminder_frequency,
+                rxNormId: medication.rxNormId
             });
-        } else {
-            setSelectedMedication({ id: '', name: '', strength: '', frequency: '' });
+        } else if (mode === 'remove' && medication) {
+            setSelectedMedication({
+                id: medication.id,
+                name: medication.drug_name,
+                strength: medication.strength,
+                frequency: medication.reminder_frequency,
+                rxNormId: medication.rxNormId
+            });
         }
         setShowModal(true);
     };
+
 
 
     useEffect(() => {
@@ -168,15 +187,18 @@ function MyMedications() {
     };
 
     const handleDrugSelect = (suggestion) => {
-        setSelectedMedication({ ...selectedMedication, name: suggestion.name });
+        setSelectedMedication({
+            ...selectedMedication,
+            name: suggestion.name,
+            rxNormId: suggestion.rxNormId,
+            strength: '',
+            frequency: ''
+        });
 
         const strengths = suggestion.strengthsAndForms || [];
         setStrengths(strengths);
-
-        if (strengths.length === 1) {
-            setSelectedMedication(prev => ({ ...prev, strength: strengths[0] }));
-        }
     };
+
 
 
     const handleFrequencyChange = (e) => {
@@ -211,7 +233,10 @@ function MyMedications() {
         }
 
         setReminderTimes(Array(numberOfInputs).fill(''));
-        setSelectedMedication({ ...selectedMedication, frequency });
+        setSelectedMedication(prevMedication => ({
+            ...prevMedication,
+            frequency: frequency
+        }));
     };
 
     const handleTimeChange = (index, time) => {
@@ -229,7 +254,10 @@ function MyMedications() {
     }, [selectedMedication.name]);
 
     const handleStrengthSelect = (strength) => {
-        setSelectedMedication({ ...selectedMedication, strength });
+        setSelectedMedication(prevMedication => ({
+            ...prevMedication,
+            strength: strength
+        }));
     };
 
     const fetchInteractions = async () => {
@@ -237,22 +265,32 @@ function MyMedications() {
             setInteractions([]);
             return;
         }
-        const rxNormIds = medications.map(medication => medication.rxNormId);
-        const apiUrl = `${SERVER_URL}/api/drug/interactions`;
 
+        const rxNormIds = medications
+            .map(medication => medication.rxNormId)
+            .filter(id => id && !isNaN(id));
+    
+        console.log('Sending rxNormIds for interactions:', rxNormIds);
+    
+        if (rxNormIds.length < 2) {
+            console.log('Not enough valid rxNormIds for interaction check');
+            setInteractions([]);
+            return;
+        }
+    
+        const apiUrl = `${SERVER_URL}/api/drug/interactions`;
         try {
             const response = await axios.post(apiUrl, { drugs: rxNormIds });
-
+    
             if (response.status === 200) {
-                const formattedInteractions =
-                    response.data.fullInteractionTypeGroup?.flatMap((group) =>
-                        group.fullInteractionType.flatMap((type) =>
-                            type.interactionPair.map((pair) => ({
-                                severity: pair.severity,
-                                description: pair.description,
-                            }))
-                        )
-                    ) || [];
+                const formattedInteractions = response.data.fullInteractionTypeGroup?.flatMap((group) =>
+                    group.fullInteractionType.flatMap((type) =>
+                        type.interactionPair.map((pair) => ({
+                            severity: pair.severity,
+                            description: pair.description,
+                        }))
+                    )
+                ) || [];
                 setInteractions(formattedInteractions);
             } else {
                 console.error('Unexpected response status:', response.status);
@@ -261,8 +299,7 @@ function MyMedications() {
             console.error('Error fetching drug interactions:', error);
         }
     };
-
-
+    
 
     return (
         <div className="my-medications">
@@ -282,6 +319,7 @@ function MyMedications() {
                         value={selectedMedication.name}
                         onChange={e => setSelectedMedication({ ...selectedMedication, name: e.target.value })}
                     />
+
                     {loading && <div>Loading...</div>}
                     <ul>
                         {suggestions.map(suggestion => (
@@ -291,11 +329,14 @@ function MyMedications() {
                         ))}
                     </ul>
                     {strengths.length > 0 && (
-                        <select value={selectedMedication.strength} onChange={e => setSelectedMedication({ ...selectedMedication, strength: e.target.value })}>
+                        <select
+                            value={selectedMedication.strength}
+                            onChange={e => handleStrengthSelect(e.target.value)}>
                             {strengths.map((strength, index) => (
                                 <option key={index} value={strength}>{strength}</option>
                             ))}
                         </select>
+
                     )}
                     <select value={reminderFrequency} onChange={handleFrequencyChange}>
                         <option value="">Select frequency</option>
@@ -318,9 +359,10 @@ function MyMedications() {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleModalClose}>Cancel</Button>
-                    <Button variant="primary" onClick={modalMode === 'add' ? handleAddMedication : handleEditMedication}>
+                    <Button variant="primary" onClick={() => modalMode === 'add' ? handleAddMedication(selectedMedication) : handleEditMedication(selectedMedication)}>
                         {modalMode === 'add' ? 'Add' : 'Save'}
                     </Button>
+
 
                 </Modal.Footer>
             </Modal>
