@@ -6,7 +6,6 @@ import useAutocomplete from '../UseAutocomplete/UseAutocomplete';
 import { AuthContext } from '../../auth/AuthContext';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 function DrugInteractionInput() {
   const { isLoggedIn } = useContext(AuthContext);
@@ -157,10 +156,9 @@ function DrugInteractionInput() {
   };
 
   useEffect(() => {
-    if (isLoggedIn && yourDrugs.length >= 2) {
-      handleSearch();
-    }
-  }, [isLoggedIn, yourDrugs]);
+    handleSearch();
+  }, [yourDrugs]);
+
 
   const handleAddDrug = () => {
     if (!selectedDrug || !selectedDrug.name || !selectedStrength || !selectedStrengthRxCUI) {
