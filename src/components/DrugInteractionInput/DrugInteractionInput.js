@@ -132,7 +132,8 @@ function DrugInteractionInput() {
   const handleSearch = async () => {
     const validDrugs = yourDrugs
       .map(drug => drug.rxNormId)
-      .filter(id => id != null);
+      .filter(id => id != null && !isNaN(Number(id)));
+    console.log("Sending drug IDs to server:", validDrugs);
 
     if (validDrugs.length >= 2) {
       const apiUrl = `${SERVER_URL}/api/drug/interactions`;
@@ -202,7 +203,7 @@ function DrugInteractionInput() {
 
   const handleSaveToProfile = async () => {
     const drug = yourDrugs.find(d => d.id === currentDrugId);
-    console.log('Drug to save:', drug); 
+    console.log('Drug to save:', drug);
 
     if (!drug || !drug.drug_name || !drug.rxNormId) {
       console.error('Drug information is incomplete');
