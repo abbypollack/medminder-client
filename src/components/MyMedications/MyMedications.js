@@ -9,16 +9,19 @@ import useAutocomplete from '../UseAutocomplete/UseAutocomplete';
 
 function MyMedications() {
     const { isLoggedIn } = useContext(AuthContext);
+    const { suggestions, fetchSuggestions, loading } = useAutocomplete('https://clinicaltables.nlm.nih.gov/api/rxterms/v3/search');
+
     const SERVER_URL = process.env.REACT_APP_SERVER_URL;
+
+    const [reminderFrequency, setReminderFrequency] = useState('');
+    const [reminderTimes, setReminderTimes] = useState([]);
+
     const [interactions, setInteractions] = useState([]);
     const [medications, setMedications] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [modalMode, setModalMode] = useState('add');
     const [selectedMedication, setSelectedMedication] = useState({ id: '', name: '', strength: '', frequency: '' });
-    const { suggestions, fetchSuggestions, loading } = useAutocomplete('https://clinicaltables.nlm.nih.gov/api/rxterms/v3/search');
     const [strengths, setStrengths] = useState([]);
-    const [reminderFrequency, setReminderFrequency] = useState('');
-    const [reminderTimes, setReminderTimes] = useState([]);
 
     useEffect(() => {
         if (isLoggedIn) {
@@ -42,7 +45,7 @@ function MyMedications() {
             console.error('Error fetching medications:', error);
         }
     };
-    
+
 
     const handleAddMedication = async () => {
         const medicationData = {
@@ -52,7 +55,7 @@ function MyMedications() {
             reminderFrequency,
             reminderTimes
         };
-        console.log('medication data:', medicationData)
+        console.log('Adding medication:', medicationData);
         const url = `${SERVER_URL}/api/users/drugs`;
 
         try {
@@ -77,7 +80,7 @@ function MyMedications() {
             reminderFrequency,
             reminderTimes
         };
-
+        console.log('Editing medication:', medicationData);
         const url = `${SERVER_URL}/api/users/drugs/${selectedMedication.id}`;
 
         try {
@@ -101,6 +104,7 @@ function MyMedications() {
             });
             fetchMedications();
             fetchInteractions();
+            console.log('Removing medication with ID:', selectedMedication.id);
         } catch (error) {
             console.error('Error removing medication:', error);
         }
@@ -187,19 +191,21 @@ function MyMedications() {
     };
 
     const handleDrugSelect = (suggestion) => {
+        console.log(suggestion)
         setSelectedMedication({
             ...selectedMedication,
             name: suggestion.name,
-            rxNormId: suggestion.rxNormId,
+            rxNormId: suggestion.rxNormIds[0],
             strength: '',
             frequency: ''
         });
 
         const strengths = suggestion.strengthsAndForms || [];
         setStrengths(strengths);
+
+        console.log('Selected Drug:', selectedMedication);
+        console.log('Strengths:', strengths);
     };
-
-
 
     const handleFrequencyChange = (e) => {
         const frequency = e.target.value;
@@ -253,10 +259,11 @@ function MyMedications() {
         }
     }, [selectedMedication.name]);
 
-    const handleStrengthSelect = (strength) => {
+    const handleStrengthSelect = (e) => {
+        const selectedStrength = e.target.value;
         setSelectedMedication(prevMedication => ({
             ...prevMedication,
-            strength: strength
+            strength: selectedStrength
         }));
     };
 
@@ -269,19 +276,19 @@ function MyMedications() {
         const rxNormIds = medications
             .map(medication => medication.rxNormId)
             .filter(id => id && !isNaN(id));
-    
+
         console.log('Sending rxNormIds for interactions:', rxNormIds);
-    
+
         if (rxNormIds.length < 2) {
             console.log('Not enough valid rxNormIds for interaction check');
             setInteractions([]);
             return;
         }
-    
+
         const apiUrl = `${SERVER_URL}/api/drug/interactions`;
         try {
             const response = await axios.post(apiUrl, { drugs: rxNormIds });
-    
+
             if (response.status === 200) {
                 const formattedInteractions = response.data.fullInteractionTypeGroup?.flatMap((group) =>
                     group.fullInteractionType.flatMap((type) =>
@@ -299,7 +306,7 @@ function MyMedications() {
             console.error('Error fetching drug interactions:', error);
         }
     };
-    
+
 
     return (
         <div className="my-medications">
@@ -331,12 +338,11 @@ function MyMedications() {
                     {strengths.length > 0 && (
                         <select
                             value={selectedMedication.strength}
-                            onChange={e => handleStrengthSelect(e.target.value)}>
+                            onChange={handleStrengthSelect}>
                             {strengths.map((strength, index) => (
                                 <option key={index} value={strength}>{strength}</option>
                             ))}
                         </select>
-
                     )}
                     <select value={reminderFrequency} onChange={handleFrequencyChange}>
                         <option value="">Select frequency</option>
