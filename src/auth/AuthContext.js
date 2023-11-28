@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUserState] = useState(null);
 
   const setUserAndLogin = (userData, token = null) => {
+    console.log('Setting user data:', userData);
     if (userData && token) {
       sessionStorage.setItem('token', token);
       sessionStorage.setItem('userData', JSON.stringify(userData));
@@ -20,6 +21,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = sessionStorage.getItem('token');
     const savedUserData = sessionStorage.getItem('userData');
+    console.log('savedUserData',savedUserData)
 
     if (token && savedUserData) {
       const userData = JSON.parse(savedUserData);

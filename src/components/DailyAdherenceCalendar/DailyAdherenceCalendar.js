@@ -9,6 +9,7 @@ function DailyAdherenceCalendar({ loggedMedications }) {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
+    console.log("DailyAdherenceCalendar loggedMedications:", loggedMedications);
     const mappedEvents = loggedMedications.map(log => {
       try {
         const startDateTime = new Date(log.action_time);

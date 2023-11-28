@@ -35,6 +35,7 @@ function DrugInteractionInput() {
   const fetchUserMedications = async () => {
     try {
       const token = sessionStorage.getItem('token');
+      console.log(token)
       if (!token) throw new Error('No token provided');
 
       const response = await axios.get(`${SERVER_URL}/api/users/drugs`, {

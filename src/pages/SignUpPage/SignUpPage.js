@@ -20,13 +20,17 @@ function SignupPage() {
         email: '',
         password: '',
         confirm_password: '',
+        agreeToPhoneUse: false,
     });
     const [errors, setErrors] = useState({});
     const navigate = useNavigate();
 
     const handleChange = (event) => {
-        const { name, value } = event.target;
-        setFormData({ ...formData, [name]: value });
+        const { name, value, type, checked } = event.target;
+        setFormData({
+            ...formData, 
+            [name]: type === 'checkbox' ? checked : value
+        });
 
         let newErrors = { ...errors };
         if (name === "password" && formData.confirm_password && value !== formData.confirm_password) {
@@ -100,6 +104,11 @@ function SignupPage() {
             newErrors.confirm_password = 'Passwords do not match.';
         }
 
+        if (!formData.agreeToPhoneUse) {
+            isValid = false;
+            newErrors.agreeToPhoneUse = 'You must agree to use your phone number for reminders.';
+        }
+
         setErrors(newErrors);
         return isValid;
     };
@@ -126,6 +135,9 @@ function SignupPage() {
 
                 <Input type="password" name="confirm_password" label="Confirm Password" value={formData.confirm_password} onChange={handleChange} required minLength="8" />
                 {errors.confirm_password && <div className="signup__error">{errors.confirm_password}</div>}
+                
+                <Input type="checkbox" name="agreeToPhoneUse" label="I agree to use my phone number for reminders" onChange={handleChange} checked={formData.agreeToPhoneUse} required/>
+                {errors.agreeToPhoneUse && <div className="signup__error">{errors.agreeToPhoneUse}</div>}
 
                 <button className="signup__button">Sign up</button>
                 <GoogleAuthButton buttonText="Sign Up" />

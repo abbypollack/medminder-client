@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 const Profile = () => {
   const API_URL = process.env.REACT_APP_SERVER_URL;
   const { user, setUser } = useContext(AuthContext);
+  console.log('User state in Profile component:', user);
 
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
